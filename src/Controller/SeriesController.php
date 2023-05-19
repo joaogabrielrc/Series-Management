@@ -19,17 +19,12 @@ class SeriesController extends AbstractController
     }
 
     #[Route(path: '/series', name: 'app_series', methods: ['GET'])]
-    public function index(Request $request): Response
+    public function index(): Response
     {
         $seriesList = $this->seriesRepository->findAll();
 
-        $session = $request->getSession();
-        $successMessage = $session->get("success");
-        $session->remove("success");
-
         return $this->render('series/index.html.twig', [
-            'seriesList' => $seriesList,
-            'successMessage' => $successMessage
+            'seriesList' => $seriesList
         ]);
     }
 
@@ -47,8 +42,7 @@ class SeriesController extends AbstractController
 
         $this->seriesRepository->save(entity: $series, flush: true);
 
-        $session = $request->getSession();
-        $session->set("success", "Série {$series->getName()} adicionada com sucesso!");
+        $this->addFlash("success", "Série {$series->getName()} adicionada com sucesso!");
 
         return new RedirectResponse('/series');
     }
@@ -82,8 +76,7 @@ class SeriesController extends AbstractController
         $series->setName($seriesForm->name);
         $this->seriesRepository->save(entity: $series, flush: true);
 
-        $session = $request->getSession();
-        $session->set("success", "Série {$series->getName()} atualizada com sucesso!");
+        $this->addFlash("success", "Série {$series->getName()} atualizada com sucesso!");
 
         return new RedirectResponse('/series');
     }
@@ -94,14 +87,13 @@ class SeriesController extends AbstractController
         requirements: ['id' => '\d+'],
         methods: ['DELETE']
     )]
-    public function delete(int $id, Request $request): Response
+    public function delete(int $id): Response
     {
         $series = $this->seriesRepository->find($id);
 
         $this->seriesRepository->remove(entity: $series, flush: true);
 
-        $session = $request->getSession();
-        $session->set("success", "Série {$series->getName()} removida com sucesso!");
+        $this->addFlash("success", "Série {$series->getName()} removida com sucesso!");
 
         return new RedirectResponse('/series');
     }

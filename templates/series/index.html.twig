@@ -4,11 +4,13 @@
 
 {% block body %}
 <div>
-    {% if successMessage is not empty %}
-        <div class="alert alert-success">
-            {{ successMessage }}
-        </div>
-    {% endif %}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
 
     <h1 class="mb-3">Listagem de séries:</h1>
 
