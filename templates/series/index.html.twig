@@ -9,8 +9,21 @@
     <a href="{{ path('app_series_form_create') }}" class="btn btn-dark mb-3">Adicionar</a>
 
     <ul class="list-group">
-        {% for serie in series %}
-            <li class="list-group-item">{{ serie.name }}</li>
+        {% for series in seriesList %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ series.name }}</span>
+
+                <div class="d-flex justify-content-center align-items-center">
+                    <a href="{{ path('app_series_form_update', { id: series.id }) }}" class="btn btn-sm btn-primary me-2">
+                        E
+                    </a>
+
+                    <form action="{{ path('app_series_delete', { id: series.id }) }}" method="post">
+                        <input type="hidden" name="_method" value="DELETE" />
+                        <button type="submit" class="btn btn-sm btn-danger">X</button>
+                    </form>
+                </div>
+            </li>
         {% endfor %}
     </ul>
 </div>
