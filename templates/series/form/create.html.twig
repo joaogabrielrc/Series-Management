@@ -14,11 +14,6 @@
             <span>Voltar</span>
         </a>
 
-        <form action="{{ path('app_series_create') }}" method="post" class="mt-3">
-            <label for="name" class="form-label">Nome da série:</label>
-            <input type="text" name="name" id="name" class="form-control" />
-
-            <button type="submit" class="btn btn-dark mt-2">Adicionar</button>
-        </form>
+        {{ form(seriesForm) }}
     </div>
 {% endblock %}

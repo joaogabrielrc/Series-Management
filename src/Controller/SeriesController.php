@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Dto\SeriesUpdateDto;
 use App\Entity\Series;
+use App\Form\SeriesType;
 use App\Repository\SeriesRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -31,14 +32,15 @@ class SeriesController extends AbstractController
     #[Route(path: '/series/create', name: 'app_series_form_create', methods: ['GET'])]
     public function formCreate(): Response
     {
-        return $this->render('series/form/create.html.twig');
+        $seriesForm = $this->createForm(SeriesType::class, new Series(''));
+        return $this->renderForm('series/form/create.html.twig', compact('seriesForm'));
     }
 
     #[Route(path: '/series', name: 'app_series_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        $inputName = $request->request->get('name');
-        $series = new Series($inputName);
+        $series = new Series('');
+        $this->createForm(SeriesType::class, $series)->handleRequest($request);
 
         $this->seriesRepository->save(entity: $series, flush: true);
 
