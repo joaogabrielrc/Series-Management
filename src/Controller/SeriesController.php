@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Dto\SeriesUpdateDto;
 use App\Entity\Series;
 use App\Form\SeriesType;
 use App\Repository\SeriesRepository;
@@ -33,14 +32,25 @@ class SeriesController extends AbstractController
     public function formCreate(): Response
     {
         $seriesForm = $this->createForm(SeriesType::class, new Series(''));
-        return $this->renderForm('series/form/create.html.twig', compact('seriesForm'));
+        return $this->render(
+            view: 'series/form/create.html.twig',
+            parameters: compact('seriesForm')
+        );
     }
 
     #[Route(path: '/series', name: 'app_series_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
         $series = new Series('');
-        $this->createForm(SeriesType::class, $series)->handleRequest($request);
+        $seriesForm = $this->createForm(SeriesType::class, $series)
+            ->handleRequest($request);
+
+        if (!$seriesForm->isValid()) {
+            return $this->render(
+                view: 'series/form/create.html.twig',
+                parameters: compact('seriesForm')
+            );
+        }
 
         $this->seriesRepository->save(entity: $series, flush: true);
 
@@ -55,13 +65,21 @@ class SeriesController extends AbstractController
         requirements: ['id' => '\d+'],
         methods: ['GET']
     )]
-    public function formUpdate(int $id): Response
+    public function formUpdate(Series $series): Response
     {
-        $series = $this->seriesRepository->find($id);
+        $seriesForm = $this->createForm(
+            SeriesType::class,
+            $series,
+            [
+                'is_create' => false,
+                'id' => $series->getId()
+            ]
+        );
 
-        return $this->render('series/form/update.html.twig', [
-            'series' => $series
-        ]);
+        return $this->render(
+            view: 'series/form/update.html.twig',
+            parameters: compact('seriesForm')
+        );
     }
 
     #[Route(
@@ -70,12 +88,25 @@ class SeriesController extends AbstractController
         requirements: ['id' => '\d+'],
         methods: ['PATCH']
     )]
-    public function update(int $id, Request $request): Response
+    public function update(Series $series, Request $request): Response
     {
-        $seriesForm = new SeriesUpdateDto($request->request);
-        $series = $this->seriesRepository->find($id);
+        $seriesForm = $this->createForm(
+            SeriesType::class,
+            $series,
+            [
+                'is_create' => false,
+                'id' => $series->getId()
+            ]
+        );
+        $seriesForm->handleRequest($request);
 
-        $series->setName($seriesForm->name);
+        if (!$seriesForm->isValid()) {
+            return $this->render(
+                view: 'series/form/update.html.twig',
+                parameters: compact('seriesForm')
+            );
+        }
+
         $this->seriesRepository->save(entity: $series, flush: true);
 
         $this->addFlash("success", "Série {$series->getName()} atualizada com sucesso!");

@@ -14,13 +14,9 @@
             <span>Voltar</span>
         </a>
 
-        <form action="{{ path('app_series_update', { id: series.id }) }}" method="post" class="mt-3">
-            <input type="hidden" name="_method" value="patch" />
-
-            <label for="name" class="form-label">Nome da série:</label>
-            <input type="text" name="name" id="name" value="{{ series.name }}" class="form-control" />
-
-            <button type="submit" class="btn btn-dark mt-2">Atualizar</button>
-        </form>
+        {{ form_start(seriesForm, {'attr': {'class': 'mt-3'}}) }}
+        {{ form_row(seriesForm.name) }}
+        {{ form_widget(seriesForm.submit, {'attr': {'class': 'btn-dark'}}) }}
+        {{ form_end(seriesForm) }}
     </div>
 {% endblock %}
