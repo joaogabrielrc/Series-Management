@@ -2,9 +2,15 @@
 
 namespace App\Controller;
 
+use App\Dto\SeriesFormDto;
+use App\Entity\Episode;
+use App\Entity\Season;
 use App\Entity\Series;
 use App\Form\SeriesType;
+use App\Repository\EpisodeRepository;
+use App\Repository\SeasonRepository;
 use App\Repository\SeriesRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +20,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class SeriesController extends AbstractController
 {
 
-    public function __construct(private readonly SeriesRepository $seriesRepository)
+    public function __construct(
+        private readonly SeriesRepository $seriesRepository,
+        private readonly SeasonRepository $seasonRepository,
+        private readonly EpisodeRepository $episodeRepository
+    )
     {
     }
 
@@ -31,25 +41,46 @@ class SeriesController extends AbstractController
     #[Route(path: '/series/create', name: 'app_series_form_create', methods: ['GET'])]
     public function formCreate(): Response
     {
-        $seriesForm = $this->createForm(SeriesType::class, new Series(''));
+        $seriesDto = new SeriesFormDto();
+        $seriesForm = $this->createForm(SeriesType::class, $seriesDto, ['is_create' => true]);
+
         return $this->render(
-            view: 'series/form/create.html.twig',
-            parameters: compact('seriesForm')
+            view: 'series/form.html.twig',
+            parameters: [
+                'seriesForm' => $seriesForm,
+                'isCreate' => true
+            ]
         );
     }
 
     #[Route(path: '/series', name: 'app_series_create', methods: ['POST'])]
     public function create(Request $request): Response
     {
-        $series = new Series('');
-        $seriesForm = $this->createForm(SeriesType::class, $series)
-            ->handleRequest($request);
+        $seriesDto = new SeriesFormDto();
+        $seriesForm = $this->createForm(SeriesType::class, $seriesDto, ['is_create' => true]);
+        $seriesForm->handleRequest($request);
 
         if (!$seriesForm->isValid()) {
             return $this->render(
-                view: 'series/form/create.html.twig',
-                parameters: compact('seriesForm')
+                view: 'series/form.html.twig',
+                parameters: [
+                    'seriesForm' => $seriesForm,
+                    'isCreate' => true
+                ]
             );
+        }
+
+        $series = new Series(name: $seriesDto->name);
+
+        for ($i = 1; $i <= $seriesDto->seasonsQuantity ; $i++) {
+            $season = new Season($i);
+
+            for ($j = 1; $j <= $seriesDto->episodesPerSeason; $j++) {
+                $episode = new Episode($j);
+                $season->addEpisode($episode);
+            }
+
+            $series->addSeason($season);
         }
 
         $this->seriesRepository->save(entity: $series, flush: true);
@@ -67,18 +98,20 @@ class SeriesController extends AbstractController
     )]
     public function formUpdate(Series $series): Response
     {
+
+        $seriesDto = new SeriesFormDto();
         $seriesForm = $this->createForm(
             SeriesType::class,
-            $series,
-            [
-                'is_create' => false,
-                'id' => $series->getId()
-            ]
+            $seriesDto,
+            ['is_create' => false, 'id' => $series->getId()]
         );
 
         return $this->render(
-            view: 'series/form/update.html.twig',
-            parameters: compact('seriesForm')
+            view: 'series/form.html.twig',
+            parameters: [
+                'seriesForm' => $seriesForm,
+                'isCreate' => false
+            ]
         );
     }
 
@@ -90,22 +123,25 @@ class SeriesController extends AbstractController
     )]
     public function update(Series $series, Request $request): Response
     {
+        $seriesDto = new SeriesFormDto();
         $seriesForm = $this->createForm(
             SeriesType::class,
-            $series,
-            [
-                'is_create' => false,
-                'id' => $series->getId()
-            ]
+            $seriesDto,
+            ['is_create' => false, 'id' => $series->getId()]
         );
         $seriesForm->handleRequest($request);
 
         if (!$seriesForm->isValid()) {
             return $this->render(
-                view: 'series/form/update.html.twig',
-                parameters: compact('seriesForm')
+                view: 'series/form.html.twig',
+                parameters: [
+                    'seriesForm' => $seriesForm,
+                    'isCreate' => false
+                ]
             );
         }
+
+        $series->setName($seriesDto->name);
 
         $this->seriesRepository->save(entity: $series, flush: true);
 

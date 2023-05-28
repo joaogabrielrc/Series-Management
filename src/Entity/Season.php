@@ -16,16 +16,17 @@ class Season
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToMany(mappedBy: 'season', targetEntity: Episode::class, orphanRemoval: true)]
+    #[ORM\OneToMany(
+        mappedBy: 'season',
+        targetEntity: Episode::class,
+        cascade: ['persist'],
+        orphanRemoval: true
+    )]
     private Collection $episodes;
 
     public function __construct(
         #[ORM\Column]
-        private int $number,
-
-        #[ORM\ManyToOne(inversedBy: 'seasons')]
-        #[ORM\JoinColumn(nullable: false)]
-        private Series $series
+        private int $number
     )
     {
         $this->episodes = new ArrayCollection();
@@ -60,32 +61,6 @@ class Season
     {
         if (!$this->episodes->contains($episode)) {
             $this->episodes->add($episode);
-            $episode->setSeason($this);
         }
     }
-
-    /**
-     * @return Series
-     */
-    public function getSeries(): Series
-    {
-        return $this->series;
-    }
-
-    /**
-     * @param Series $series
-     */
-    public function setSeries(Series $series): void
-    {
-        $this->series = $series;
-    }
-
-//    public function removeEpisode(Episode $episode): void
-//    {
-//        if ($this->episodes->removeElement($episode)) {
-//            if ($episode->getSeason() === $this) {
-//                $episode->setSeason(null);
-//            }
-//        }
-//    }
 }

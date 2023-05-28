@@ -16,11 +16,7 @@ class Episode
 
     public function __construct(
         #[ORM\Column]
-        private int $number,
-
-        #[ORM\ManyToOne(inversedBy: 'episodes')]
-        #[ORM\JoinColumn(nullable: false)]
-        private Season $season
+        private int $number
     )
     {
     }
@@ -38,15 +34,5 @@ class Episode
     public function setNumber(int $number): void
     {
         $this->number = $number;
-    }
-
-    public function getSeason(): Season
-    {
-        return $this->season;
-    }
-
-    public function setSeason(Season $season): void
-    {
-        $this->season = $season;
     }
 }

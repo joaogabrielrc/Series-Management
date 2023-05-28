@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Atualizar Série{% endblock %}
+{% block title %}{{ isCreate == true ? 'Adicionar' : 'Atualizar' }} Série{% endblock %}
 
 {% block body %}
     <div>
@@ -16,6 +16,8 @@
 
         {{ form_start(seriesForm, {'attr': {'class': 'mt-3'}}) }}
         {{ form_row(seriesForm.name) }}
+        {{ form_row(seriesForm.seasonsQuantity) }}
+        {{ form_row(seriesForm.episodesPerSeason) }}
         {{ form_widget(seriesForm.submit, {'attr': {'class': 'btn-dark'}}) }}
         {{ form_end(seriesForm) }}
     </div>
